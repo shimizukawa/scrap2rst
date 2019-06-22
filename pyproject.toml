@@ -11,7 +11,7 @@ repository = "https://github.com/shimizukawa/scrap2rst"
 documentation = "https://github.com/shimizukawa/sshh/blob/master/README.rst"
 keywords = ["markup", "scrapbox", "reStructuredText", "reST"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 1 - Planning",
     "Environment :: Console",
     "Intended Audience :: Information Technology",
     "Intended Audience :: Developers",
