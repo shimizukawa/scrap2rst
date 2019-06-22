@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scrap2rst"
-version = "0.1.0"
+version = "0.0.0"
 description = "Converting scrapbox syntax into reStructuredText"
 authors = ["shimizukawa <shimizukawa@gmail.com>"]
 license = "MIT"
@@ -32,6 +32,9 @@ pytest = ">=3.0"
 twine = ">=1.13"
 towncrier = ">=19.2"
 tox = "^3.12"
+
+[tool.poetry.scripts]
+scrap2rst = "scrap2rst.cmd:main"
 
 [build-system]
 requires = ["poetry>=0.12"]
