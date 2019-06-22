@@ -4,15 +4,76 @@ version = "0.1.0"
 description = "Converting scrapbox syntax into reStructuredText"
 authors = ["shimizukawa <shimizukawa@gmail.com>"]
 license = "MIT"
+readme = "README.rst"
+include = ["CHANGELOG.rst"]
+homepage = "https://github.com/shimizukawa/scrap2rst"
+repository = "https://github.com/shimizukawa/scrap2rst"
+documentation = "https://github.com/shimizukawa/sshh/blob/master/README.rst"
+keywords = ["markup", "scrapbox", "reStructuredText", "reST"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Information Technology",
+    "Intended Audience :: Developers",
+    "Operating System :: MacOS :: MacOS X",
+    "Operating System :: POSIX :: BSD",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Unix",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Utilities",
+    "Topic :: Text Processing :: Markup",
+]
 
 [tool.poetry.dependencies]
-python = "^3.7"
+python = ">=3.6"
 
 [tool.poetry.dev-dependencies]
-pytest = "^3.0"
-twine = "^1.13"
-towncrier = "^19.2"
+pytest = ">=3.0"
+twine = ">=1.13"
+towncrier = ">=19.2"
 
 [build-system]
 requires = ["poetry>=0.12"]
 build-backend = "poetry.masonry.api"
+
+[tool.towncrier]
+package = "scrap2rst"
+package_dir = "."
+filename = "CHANGELOG.rst"
+directory = "changelog/"
+title_format = "{version} ({project_date})"
+template = "changelog/_template.rst"
+
+  [[tool.towncrier.type]]
+  directory = "removal"
+  name = "Feature Removed"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "deprecation"
+  name = "Deprecation"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "feature"
+  name = "New Feature"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "bugfix"
+  name = "Bug Fix"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "vendor"
+  name = "Dependencies Update"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "doc"
+  name = "Documentation"
+  showcontent = true
+
+  [[tool.towncrier.type]]
+  directory = "trivial"
+  name = "Trivial"
