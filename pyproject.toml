@@ -31,6 +31,7 @@ python = ">=3.6"
 pytest = ">=3.0"
 twine = ">=1.13"
 towncrier = ">=19.2"
+tox = "^3.12"
 
 [build-system]
 requires = ["poetry>=0.12"]
@@ -77,3 +78,36 @@ template = "changelog/_template.rst"
   [[tool.towncrier.type]]
   directory = "trivial"
   name = "Trivial"
+
+[tool.tox]
+legacy_tox_ini = """
+[tox]
+envlist = flake8,mypy,py37
+skipsdist = True
+
+[testenv]
+skip_install = true
+
+[testenv:py37]
+basepython = python3.7
+whitelist_externals = poetry
+commands =
+    poetry install -v
+    poetry run pytest {posargs}
+
+[testenv:mypy]
+deps = mypy
+basepython = python3.7
+commands = mypy scrap2rst
+
+[testenv:flake8]
+deps =
+    flake8>=3.7.7,<3.8
+    flake8-blind-except
+    flake8-import-order
+    mccabe
+    radon
+setenv =
+    PYTHONDONTWRITEBYTECODE = 1
+commands = flake8 scrap2rst
+"""
