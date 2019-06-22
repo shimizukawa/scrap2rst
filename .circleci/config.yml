@@ -20,6 +20,7 @@ jobs:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.6/site-packages"
-      - run:
-          command: |
-            poetry run tox
+      - run: poetry run tox -e flake8
+      - run: poetry run tox -e mypy
+      - run: poetry run tox -e py37
+      - run: poetry run tox -e readme

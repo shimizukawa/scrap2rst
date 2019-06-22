@@ -82,7 +82,7 @@ template = "changelog/_template.rst"
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = flake8,mypy,py37,readme
+envlist = flake8,mypy,py37
 skipsdist = True
 
 [testenv]
