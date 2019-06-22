@@ -82,7 +82,7 @@ template = "changelog/_template.rst"
 [tool.tox]
 legacy_tox_ini = """
 [tox]
-envlist = flake8,mypy,py37
+envlist = flake8,mypy,py37,readme
 skipsdist = True
 
 [testenv]
@@ -110,4 +110,11 @@ deps =
 setenv =
     PYTHONDONTWRITEBYTECODE = 1
 commands = flake8 scrap2rst
+
+[testenv:readme]
+basepython = python3.7
+whitelist_externals = poetry twine
+commands =
+    poetry build -f wheel
+    twine check dist/*
 """
