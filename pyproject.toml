@@ -113,7 +113,9 @@ commands = flake8 scrap2rst
 
 [testenv:readme]
 basepython = python3.7
-whitelist_externals = poetry twine
+whitelist_externals =
+    poetry
+    twine
 commands =
     poetry build -f wheel
     twine check dist/*
