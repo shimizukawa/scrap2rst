@@ -8,7 +8,7 @@ readme = "README.rst"
 include = ["CHANGELOG.rst"]
 homepage = "https://github.com/shimizukawa/scrap2rst"
 repository = "https://github.com/shimizukawa/scrap2rst"
-documentation = "https://github.com/shimizukawa/sshh/blob/master/README.rst"
+documentation = "https://github.com/shimizukawa/scrap2rst/blob/master/README.rst"
 keywords = ["markup", "scrapbox", "reStructuredText", "reST"]
 classifiers = [
     "Development Status :: 1 - Planning",

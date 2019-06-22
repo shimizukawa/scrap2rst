@@ -6,7 +6,7 @@
 {{ definitions[category]['name'] }}
 {{ underline * definitions[category]['name']|length }}
 
-{% if definitions[category]['showcontent'] %}{% for text, values in sections[section][category]|dictsort(by='value') %}{% set issue_joiner = joiner(', ') %}- {% for value in values|sort %}{{ issue_joiner() }}`{{ value }} <https://github.com/shimizukawa/sshh/issues/{{ value[1:] }}>`_{% endfor %}: {{ text }}
+{% if definitions[category]['showcontent'] %}{% for text, values in sections[section][category]|dictsort(by='value') %}{% set issue_joiner = joiner(', ') %}- {% for value in values|sort %}{{ issue_joiner() }}`{{ value }} <https://github.com/shimizukawa/scrap2rst/issues/{{ value[1:] }}>`_{% endfor %}: {{ text }}
 
 {% endfor %}{% else %}- {{ sections[section][category]['']|sort|join(', ') }}
 
