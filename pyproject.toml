@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scrap2rst"
-version = "0.1.0"
+version = "0.1.1"
 description = "Converting scrapbox syntax into reStructuredText"
 authors = ["shimizukawa <shimizukawa@gmail.com>"]
 license = "MIT"
@@ -11,7 +11,7 @@ repository = "https://github.com/shimizukawa/scrap2rst"
 documentation = "https://github.com/shimizukawa/scrap2rst/blob/master/README.rst"
 keywords = ["markup", "scrapbox", "reStructuredText", "reST"]
 classifiers = [
-    "Development Status :: 1 - Planning",
+    "Development Status :: 3 - Alpha",
     "Environment :: Console",
     "Intended Audience :: Information Technology",
     "Intended Audience :: Developers",
