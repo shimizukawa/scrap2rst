@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "scrap2rst"
-version = "0.0.0"
+version = "0.1.0"
 description = "Converting scrapbox syntax into reStructuredText"
 authors = ["shimizukawa <shimizukawa@gmail.com>"]
 license = "MIT"
