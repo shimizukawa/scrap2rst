@@ -23,7 +23,21 @@ scrap2rst
 Feature
 =======
 
-Not yet.
+* Page header
+* Heading level2 if the line is strong text.
+* Figure if the line is link to image.
+* Image if the line contains link to image.
+* Link if the line contains link excluding to image url.
+
+Still many limitation are exist.
+
+Command
+=======
+
+Convert from scrapbox into reStructuredText::
+
+  $ scrap2rst URL -o output.rst
+
 
 License
 =======
