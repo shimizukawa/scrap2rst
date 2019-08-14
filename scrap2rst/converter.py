@@ -47,7 +47,8 @@ M = {
     'bullet': re.compile(r'([\s\t]+)(.*$)').match,
     'figure': re.compile(r'\[(https://gyazo.com/.*|.*\.(jpg|png|gif))\]$').match,
     'image': re.compile(r'\[(https://gyazo.com/.*|.*\.(jpg|png|gif))\]$').match,
-    'link': re.compile(r'(.*)\[(https?://[^\s]+)\s+([^\]]+)\](.*)').match,
+    'link': re.compile(r'(.*)\[([^\]]+)\](.*)').match,
+    'link_external': re.compile(r'^(https?://[^\s]+)\s+([^\]]+)$').match,
 }
 
 
@@ -55,6 +56,7 @@ class Convert:
     def __init__(self, data: str):
         self.data = data
         self.line_states = []
+        self.link_targets = {}
 
     def _h1(self, line):
         hr = '=' * wlen(line)
@@ -120,7 +122,14 @@ class Convert:
         elif M['link'](line):
             name = 'link'
             m = M['link'](line)
-            result = '{0} `{2} <{1}>`__ {3}'.format(*m.groups())
+            _pre, _target, _post = m.groups()
+            if M['link_external'](_target):
+                _link, _title = M['link_external'](_target)
+                result = '{0} `{2} <{1}>`__ {3}'.format(_pre, _link, _title, _post)
+            else:
+                _link = _target.replace(' ', '_')
+                result = '{0} `{1}`_ {2}'.format(_pre, _target, _post)
+                self.link_targets[_target] = f'https://scrapbox.io/shimizukawa/{_link}'
         else:
             name = 'NOTHING'
             result = line
@@ -132,6 +141,12 @@ class Convert:
         output = []
         for ln, line in enumerate(self.data.splitlines()):
             output.extend(self.parse_paragraph_and_render(line, ln))
+
+        for k, v in self.link_targets.items():
+            output.extend([
+                '',
+                f".. _{k}: {v}",
+            ])
 
         return '\n'.join(output)
 
