@@ -17,6 +17,17 @@ def get_api_url(url: str) -> str:
     return api_url
 
 
+def get_user_url(url: str) -> str:
+    parts = urlparse(url)
+    path = quote(parts.path)
+    if path.startswith('/api/'):
+        user = path.strip('/').split('/')[2]
+    else:
+        user = path.strip('/').split('/')[0]
+    user_url = urlunparse((*parts[:2], user, '', '', ''))
+    return user_url
+
+
 def fetch(api_url: str) -> str:
     logger.info('fetch: %s', api_url)
     data = urlopen(api_url).read()
@@ -53,8 +64,9 @@ M = {
 
 
 class Convert:
-    def __init__(self, data: str):
+    def __init__(self, data: str, user_url: str):
         self.data = data
+        self.user_url = user_url
         self.line_states = []
         self.link_targets = {}
 
@@ -124,12 +136,12 @@ class Convert:
             m = M['link'](line)
             _pre, _target, _post = m.groups()
             if M['link_external'](_target):
-                _link, _title = M['link_external'](_target)
-                result = '{0} `{2} <{1}>`__ {3}'.format(_pre, _link, _title, _post)
+                _link, _title = M['link_external'](_target).groups()
             else:
-                _link = _target.replace(' ', '_')
-                result = '{0} `{1}`_ {2}'.format(_pre, _target, _post)
-                self.link_targets[_target] = f'https://scrapbox.io/shimizukawa/{_link}'
+                _link = self.user_url + '/' + _target.replace(' ', '_')
+                _title = _target
+            result = '{0} `{1}`_ {2}'.format(_pre, _title, _post)
+            self.link_targets[_title] = _link
         else:
             name = 'NOTHING'
             result = line
@@ -153,5 +165,7 @@ class Convert:
 
 def convert(url: str) -> str:
     api_url = get_api_url(url)
+    user_url = get_user_url(url)
+    logger.info('user url: %s', user_url)
     data = fetch(api_url)
-    return Convert(data).run()
+    return Convert(data, user_url).run()
