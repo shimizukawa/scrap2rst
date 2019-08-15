@@ -4,6 +4,9 @@ from urllib.request import urlopen
 from urllib.parse import urlparse, urlunparse, quote
 import unicodedata
 import typing
+from dataclasses import dataclass
+from enum import Enum
+import os.path
 
 logger = logging.getLogger(__name__)
 
@@ -60,7 +63,44 @@ M = {
     'image': re.compile(r'\[(https://gyazo.com/.*|.*\.(jpg|png|gif))\]$').match,
     'link': re.compile(r'(.*)\[([^\]]+)\](.*)').match,
     'link_external': re.compile(r'^(https?://[^\s]+)\s+([^\]]+)$').match,
+    'code': re.compile(r'code:(.+)$').match,
 }
+
+
+CODE_EXT_LANG = {
+    '.py': 'python',
+    '.sh': 'shell',
+    '.bash': 'shell',
+    '.rst': 'rst',
+}
+
+
+CODE_TYPE_LANG = {
+    'python': 'python',
+    'shell': 'shell',
+}
+
+
+class ModeType(Enum):
+    NONE = 0
+    CODE = 1
+
+
+@dataclass
+class Mode:
+    type: ModeType = ModeType.NONE
+    indent: typing.Optional[int] = None
+    attr: typing.Any = None
+
+    def set_code(self, indent, attr):
+        self.type = ModeType.CODE
+        self.indent = indent
+        self.attr = attr
+
+    def reset(self):
+        self.type = ModeType.NONE
+        self.indent = None
+        self.attr = None
 
 
 class Convert:
@@ -69,6 +109,7 @@ class Convert:
         self.user_url = user_url
         self.line_states = []
         self.link_targets = {}
+        self.mode = Mode()
 
     def _h1(self, line):
         hr = '=' * wlen(line)
@@ -79,6 +120,19 @@ class Convert:
         return '\n'.join((line, hr))
 
     def parse_paragraph_and_render(self, line: str, ln: int) -> 'typing.List[str]':
+        if self.mode.type == ModeType.CODE:
+            m = re.match(r'([\s\t]+)', line)
+            if not m:
+                self.mode.reset()
+            else:
+                indent = len(m.group(1))
+                if indent < self.mode.indent + 2:
+                    self.mode.reset()
+                else:
+                    # import pdb;pdb.set_trace()
+                    self.line_states.append(('code', indent))
+                    return [' ' * 2 * (self.mode.indent + 1) + line[indent:]]
+
         if ln == 0:
             name = 'title'
             result = [
@@ -99,7 +153,7 @@ class Convert:
             # FIXME: enumerated list has no 2 indented children.
             indent = (len(m.group(1)) - 1)
             pre = ' ' * 2 * indent
-            body = self.parse_inline_and_render(m.group(2), ln)
+            body = self.parse_inline_and_render(m.group(2), ln, indent)
             if self.line_states[ln-1] == (name, indent):
                 result = [pre + '* ' + body]
             else:
@@ -117,16 +171,29 @@ class Convert:
             state = (name, None)
         else:
             name = 'NOTHING'
-            result = [self.parse_inline_and_render(line, ln)]
+            result = [self.parse_inline_and_render(line, ln, 0)]  # FIXME: 0?
             state = (name, None)
 
         self.line_states.append(state)
         logger.debug('LINE %d match as %s\n     IN: %s\n    OUT: %s', ln+1, name, line, result)
         return result
 
-    def parse_inline_and_render(self, line: str, ln: int) -> str:
+    def parse_inline_and_render(self, line: str, ln: int, indent: int) -> str:
         # FIXME: inline parser must parse whole line. currently parsing a first part.
-        if M['image'](line):
+        if M['code'](line):
+            name = 'code'
+            code_type = M['code'](line).group(1)
+            self.mode.set_code(indent, code_type)
+            ext = os.path.splitext(code_type)[1]
+            if ext in CODE_EXT_LANG:
+                code_lang = CODE_EXT_LANG[ext]
+            elif code_type in CODE_TYPE_LANG:
+                code_lang = CODE_TYPE_LANG[code_type]
+            else:
+                code_lang = code_type
+                logger.warning('code type %r does not defined.', code_type)
+            result = f'.. code:: {code_lang}\n'  # reST requires empty line between directive and content.
+        elif M['image'](line):
             name = 'image'
             # FIXME: inline image must be `|name|` and `.. |name| image:: PATH`
             m = M['image'](line)
