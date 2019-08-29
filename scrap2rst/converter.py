@@ -210,11 +210,21 @@ class Convert:
             _pre, _target, _post = m.groups()
             if M['link_external'](_target):
                 _link, _title = M['link_external'](_target).groups()
+                _internal = False
             else:
                 _link = self.user_url + '/' + _target.replace(' ', '_')
                 _title = _target
-            result = '{0} `{1}`_ {2}'.format(_pre, _title, _post)
-            self.link_targets[_title] = _link
+                _internal = True
+
+            if _pre:
+                _pre = _pre + ' '
+            if _post:
+                _post = ' ' + _post
+            if _internal and self.sphinx:
+                result = '{0}:doc:`{1}`{2}'.format(_pre, _target.replace(' ', '_'), _post)
+            else:
+                result = '{0}`{1}`_{2}'.format(_pre, _title, _post)
+                self.link_targets[_title] = _link
         else:
             name = 'NOTHING'
             result = line
@@ -236,9 +246,9 @@ class Convert:
         return '\n'.join(output)
 
 
-def convert(url: str) -> str:
+def convert(url: str, sphinx: bool) -> str:
     api_url = get_api_url(url)
     user_url = get_user_url(url)
     logger.info('user url: %s', user_url)
     data = fetch(api_url)
-    return Convert(data, user_url).run()
+    return Convert(data, user_url, sphinx=sphinx).run()

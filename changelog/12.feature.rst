@@ -1,0 +1,4 @@
+option: sphinx style internal links
+
+* ``--sphinx``, ``-s`` option
+* internal links with ``:doc:`` role.
