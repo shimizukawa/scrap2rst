@@ -20,6 +20,7 @@ def get_argparser():
     p.add_argument('-o', '--output', type=argparse.FileType(mode='w', encoding='utf-8'),
                    default=sys.stdout, help='output filename')
     p.add_argument('-s', '--sphinx', action='store_true', default=False, help='sphinx mode')
+    p.add_argument('-t', '--toctree', action='store_true', default=False, help='generate toctree')
 
     return p
 
@@ -28,7 +29,7 @@ def main():
     args = get_argparser().parse_args()
     setup_logger(args.debug)
 
-    output = convert(args.url, sphinx=args.sphinx)
+    output = convert(args.url, sphinx=args.sphinx, toctree=args.toctree)
     if args.output:
         args.output.write(output)
     else:

@@ -1,4 +1,4 @@
 option: sphinx style internal links
 
-* ``--sphinx``, ``-s`` option
-* internal links with ``:doc:`` role.
+* ``--sphinx``, ``-s`` option converts scrapbox internal links to `:doc:` role.
+* ``--toctree``, ``-t`` option generates toctree directive for scrapbox internal links.
