@@ -72,13 +72,18 @@ CODE_EXT_LANG = {
     '.sh': 'shell',
     '.bash': 'shell',
     '.rst': 'rst',
+    '.yaml': 'yaml',
+    '.html': 'html',
+    '.diff': 'diff',
+    '.log': 'text',
+    '.conf': 'conf',
 }
 
 
 CODE_TYPE_LANG = {
-    'python': 'python',
-    'shell': 'shell',
+    'bash': 'bash',
 }
+CODE_TYPE_LANG.update({k:k for k in CODE_EXT_LANG.values()})
 
 
 class ModeType(Enum):
@@ -104,12 +109,13 @@ class Mode:
 
 
 class Convert:
-    def __init__(self, data: str, user_url: str):
+    def __init__(self, data: str, user_url: str, sphinx: bool):
         self.data = data
         self.user_url = user_url
         self.line_states = []
         self.link_targets = {}
         self.mode = Mode()
+        self.sphinx = sphinx  # sphinx notation
 
     def _h1(self, line):
         hr = '=' * wlen(line)
@@ -126,12 +132,12 @@ class Convert:
                 self.mode.reset()
             else:
                 indent = len(m.group(1))
-                if indent < self.mode.indent + 2:
+                if indent < self.mode.indent + 1:
                     self.mode.reset()
                 else:
                     # import pdb;pdb.set_trace()
                     self.line_states.append(('code', indent))
-                    return [' ' * 2 * (self.mode.indent + 1) + line[indent:]]
+                    return [' ' * 2 * (self.mode.indent + 1) + line[self.mode.indent:]]
 
         if ln == 0:
             name = 'title'
@@ -192,7 +198,7 @@ class Convert:
             else:
                 code_lang = code_type
                 logger.warning('code type %r does not defined.', code_type)
-            result = f'.. code:: {code_lang}\n'  # reST requires empty line between directive and content.
+            result = f'\n{indent * " " * 2}.. code:: {code_lang}\n'  # reST requires empty line before and after directive.
         elif M['image'](line):
             name = 'image'
             # FIXME: inline image must be `|name|` and `.. |name| image:: PATH`
