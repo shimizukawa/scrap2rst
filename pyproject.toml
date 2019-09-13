@@ -85,6 +85,7 @@ template = "changelog/_template.rst"
   [[tool.towncrier.type]]
   directory = "trivial"
   name = "Trivial"
+  showcontent = true
 
 [tool.tox]
 legacy_tox_ini = """
