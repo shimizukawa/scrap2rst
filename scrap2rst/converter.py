@@ -1,7 +1,9 @@
+import sys
 import logging
 import re
 from urllib.request import urlopen
 from urllib.parse import urlparse, urlunparse, quote
+from urllib.error import HTTPError
 import unicodedata
 import typing
 from dataclasses import dataclass
@@ -37,7 +39,12 @@ def get_user_url(url: str) -> str:
 
 def fetch(api_url: str) -> str:
     logger.info('fetch: %s', api_url)
-    data = urlopen(api_url).read()
+    try:
+        data = urlopen(api_url).read()
+    except HTTPError as e:
+        logger.error(e)
+        sys.exit(-1)
+
     data = data.decode('utf-8')
     return data
 
