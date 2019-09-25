@@ -13,9 +13,13 @@ logger = logging.getLogger(__name__)
 
 def get_api_url(url: str) -> str:
     parts = urlparse(url)
-    path = quote(parts.path)
-    if not path.startswith('/api/'):
-        path = '/'.join(['/api/pages', path.strip("/"), 'text'])
+    if parts.path.startswith('/api/'):
+        return url
+
+    paths = parts.path.strip('/').split('/')
+    project = paths[0]
+    pagename = '/'.join(paths[1:])
+    path = '/'.join(['/api/pages', project, quote(pagename, safe=''), 'text'])
     api_url = urlunparse((*parts[:2], path, *parts[3:]))
     return api_url
 
