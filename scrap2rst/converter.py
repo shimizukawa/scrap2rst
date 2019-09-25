@@ -49,6 +49,12 @@ def fetch(api_url: str) -> str:
     return data
 
 
+def get_normalized_image_url(image_url):
+    if image_url.startswith('https://gyazo.com/') and os.path.splitext(image_url)[1] == '':
+        image_url += '.png'
+    return image_url
+
+
 EAW = dict.fromkeys('AFW', 2)
 """
 http://www.unicode.org/reports/tr44/tr44-6.html::
@@ -179,9 +185,10 @@ class Convert:
         elif M['figure'](line):
             name = 'figure'
             m = M['figure'](line)
+            image_url = get_normalized_image_url(m.group(1))
             result = [
                 '',
-                f'.. figure:: {m.group(1)}.png',
+                f'.. figure:: {image_url}',
                 '',
                 ]
             state = (name, None)
@@ -213,7 +220,8 @@ class Convert:
             name = 'image'
             # FIXME: inline image must be `|name|` and `.. |name| image:: PATH`
             m = M['image'](line)
-            result = '.. image:: ' + m.group(1)
+            image_url = get_normalized_image_url(m.group(1))
+            result = f'.. image:: {image_url}'
         elif M['link'](line):
             name = 'link'
             m = M['link'](line)
