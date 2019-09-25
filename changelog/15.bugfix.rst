@@ -1,0 +1,1 @@
+image url for gyazo should have `.png` extension on figure directive.
