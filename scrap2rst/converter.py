@@ -181,7 +181,7 @@ class Convert:
             m = M['figure'](line)
             result = [
                 '',
-                '.. figure:: ' + m.group(1),
+                f'.. figure:: {m.group(1)}.png',
                 '',
                 ]
             state = (name, None)
