@@ -220,18 +220,16 @@ class Convert:
             _pre, _target, _post = m.groups()
             if M['link_external'](_target):
                 _link, _title = M['link_external'](_target).groups()
-                _internal = False
             else:
-                _link = _target.replace(' ', '_')
+                _link = self.user_url + '/' + _target.replace(' ', '_')
                 _title = _target
-                _internal = True
 
             if _pre:
                 _pre = _pre + ' '
             if _post:
                 _post = ' ' + _post
             result = '{0}`{1}`_{2}'.format(_pre, _title, _post)
-            self.link_targets[_title] = self.user_url + '/' + _link
+            self.link_targets[_title] = _link
         else:
             name = 'NOTHING'
             result = line
