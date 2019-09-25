@@ -79,7 +79,7 @@ M = {
     'figure': re.compile(r'\[(https://gyazo.com/.*|.*\.(jpg|png|gif))\]$').match,
     'image': re.compile(r'\[(https://gyazo.com/.*|.*\.(jpg|png|gif))\]$').match,
     'link': re.compile(r'(.*)\[([^\]]+)\](.*)').match,
-    'link_external': re.compile(r'^(https?://[^\s]+)\s+([^\]]+)$').match,
+    'link_external': re.compile(r'^(https?://[^\s]+)(\s+([^\]]+))?$').match,
     'code': re.compile(r'code:(.+)$').match,
 }
 
@@ -227,7 +227,7 @@ class Convert:
             m = M['link'](line)
             _pre, _target, _post = m.groups()
             if M['link_external'](_target):
-                _link, _title = M['link_external'](_target).groups()
+                _link, _, _title = M['link_external'](_target).groups()
             else:
                 _link = self.user_url + '/' + _target.replace(' ', '_')
                 _title = _target
@@ -236,8 +236,13 @@ class Convert:
                 _pre = _pre + ' '
             if _post:
                 _post = ' ' + _post
-            result = '{0}`{1}`_{2}'.format(_pre, _title, _post)
-            self.link_targets[_title] = _link
+            if _title:
+                # pre-text [https://example.com/foo title text] post-text
+                result = '{0}`{1}`_{2}'.format(_pre, _title, _post)
+                self.link_targets[_title] = _link
+            else:
+                # pre-text [https://example.com/foo] post-text
+                result = '{0}{1}{2}'.format(_pre, _link, _post)
         else:
             name = 'NOTHING'
             result = line
