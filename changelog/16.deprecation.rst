@@ -1,0 +1,2 @@
+
+remove ``--sphinx`` and ``--toctree`` options.
