@@ -120,15 +120,12 @@ class Mode:
 
 
 class Convert:
-    def __init__(self, data: str, user_url: str, sphinx: bool, toctree: bool):
+    def __init__(self, data: str, user_url: str):
         self.data = data
         self.user_url = user_url
         self.line_states = []
         self.link_targets = {}
         self.mode = Mode()
-        self.sphinx = sphinx  # sphinx notation
-        self.toctree = toctree  # generates toctree directive for scrapbox internal links
-        self.toctree_targets = []
 
     def _h1(self, line):
         hr = '=' * wlen(line)
@@ -233,12 +230,8 @@ class Convert:
                 _pre = _pre + ' '
             if _post:
                 _post = ' ' + _post
-            if _internal and self.sphinx:
-                result = '{0}:doc:`{1}`{2}'.format(_pre, _target.replace(' ', '_'), _post)
-                self.toctree_targets.append(_link)
-            else:
-                result = '{0}`{1}`_{2}'.format(_pre, _title, _post)
-                self.link_targets[_title] = self.user_url + '/' + _link
+            result = '{0}`{1}`_{2}'.format(_pre, _title, _post)
+            self.link_targets[_title] = self.user_url + '/' + _link
         else:
             name = 'NOTHING'
             result = line
@@ -257,16 +250,12 @@ class Convert:
                 f".. _{k}: {v}",
             ])
 
-        output.extend(['', '.. toctree::', ''])
-        for k in self.toctree_targets:
-            output.append(f"   {k}")
-
         return '\n'.join(output)
 
 
-def convert(url: str, sphinx: bool, toctree: bool) -> str:
+def convert(url: str) -> str:
     api_url = get_api_url(url)
     user_url = get_user_url(url)
     logger.info('user url: %s', user_url)
     data = fetch(api_url)
-    return Convert(data, user_url, sphinx=sphinx, toctree=toctree).run()
+    return Convert(data, user_url).run()
