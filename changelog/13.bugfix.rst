@@ -1,1 +1,0 @@
-page link with link text will have unnecessary prefix "http://scrapbox.io/proj/" on conversion.

@@ -1,1 +1,0 @@
-display 404 error message instead of python traceback

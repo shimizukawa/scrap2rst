@@ -1,3 +1,28 @@
+0.3.0 (2019-09-26)
+==================
+
+Deprecation
+-----------
+
+- `#16 <https://github.com/shimizukawa/scrap2rst/issues/16>`_: remove ``--sphinx`` and ``--toctree`` options.
+
+   
+New Feature
+-----------
+
+- `#11 <https://github.com/shimizukawa/scrap2rst/issues/11>`_: display 404 error message instead of python traceback
+
+   
+Bug Fix
+-------
+
+- `#10 <https://github.com/shimizukawa/scrap2rst/issues/10>`_: encode special chars for URL: /
+
+- `#13 <https://github.com/shimizukawa/scrap2rst/issues/13>`_: page link with link text will have unnecessary prefix "http://scrapbox.io/proj/" on conversion.
+
+- `#15 <https://github.com/shimizukawa/scrap2rst/issues/15>`_: image url for gyazo should have `.png` extension on figure directive.
+
+
 0.2.0 (2019-09-13)
 ==================
 
