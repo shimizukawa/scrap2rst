@@ -100,7 +100,7 @@ CODE_EXT_LANG = {
 CODE_TYPE_LANG = {
     'bash': 'bash',
 }
-CODE_TYPE_LANG.update({k:k for k in CODE_EXT_LANG.values()})
+CODE_TYPE_LANG.update({k: k for k in CODE_EXT_LANG.values()})
 
 
 class ModeType(Enum):
@@ -215,7 +215,8 @@ class Convert:
             else:
                 code_lang = code_type
                 logger.warning('code type %r does not defined.', code_type)
-            result = f'\n{indent * " " * 2}.. code:: {code_lang}\n'  # reST requires empty line before and after directive.
+            # note: reST requires empty line before and after directive.
+            result = f'\n{indent * " " * 2}.. code:: {code_lang}\n'
         elif M['image'](line):
             name = 'image'
             # FIXME: inline image must be `|name|` and `.. |name| image:: PATH`
