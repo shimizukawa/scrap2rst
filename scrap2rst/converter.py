@@ -232,9 +232,9 @@ class Convert:
                 _link = self.user_url + '/' + _target.replace(' ', '_')
                 _title = _target
 
-            if _pre:
+            if _pre and not _pre.endswith(' '):
                 _pre = _pre + ' '
-            if _post:
+            if _post and not _post.startswith(' '):
                 _post = ' ' + _post
             if _title:
                 # pre-text [https://example.com/foo title text] post-text
@@ -254,12 +254,15 @@ class Convert:
         output = []
         for ln, line in enumerate(self.data.splitlines()):
             output.extend(self.parse_paragraph_and_render(line, ln))
+        output.append('')
 
         for k, v in self.link_targets.items():
             output.extend([
                 '',
                 f".. _{k}: {v}",
             ])
+        if self.link_targets:
+            output.append('')
 
         return '\n'.join(output)
 
