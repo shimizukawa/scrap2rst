@@ -111,17 +111,17 @@ class ModeType(Enum):
 @dataclass
 class Mode:
     type: ModeType = ModeType.NONE
-    indent: typing.Optional[int] = None
+    indent: int = 0
     attr: typing.Any = None
 
-    def set_code(self, indent, attr):
+    def set_code(self, indent: int, attr):
         self.type = ModeType.CODE
         self.indent = indent
         self.attr = attr
 
     def reset(self):
         self.type = ModeType.NONE
-        self.indent = None
+        self.indent = 0
         self.attr = None
 
 
@@ -129,15 +129,15 @@ class Convert:
     def __init__(self, data: str, user_url: str):
         self.data = data
         self.user_url = user_url
-        self.line_states = []
-        self.link_targets = {}
+        self.line_states: typing.List[typing.Tuple[str, int]] = []
+        self.link_targets: typing.Dict[str, str] = {}
         self.mode = Mode()
 
-    def _h1(self, line):
+    def _h1(self, line: str):
         hr = '=' * wlen(line)
         return '\n'.join((hr, line, hr))
 
-    def _h2(self, line):
+    def _h2(self, line: str):
         hr = '=' * wlen(line)
         return '\n'.join((line, hr))
 
@@ -151,7 +151,6 @@ class Convert:
                 if indent < self.mode.indent + 1:
                     self.mode.reset()
                 else:
-                    # import pdb;pdb.set_trace()
                     self.line_states.append(('code', indent))
                     return [' ' * 2 * (self.mode.indent + 1) + line[self.mode.indent:]]
 
@@ -161,14 +160,11 @@ class Convert:
                 self._h1(line),
                 '',
             ]
-            state = (name, None)
+            state = (name, 0)
         elif M['heading'](line):
             name = 'heading'
-            result = [
-                self._h2(M['heading'](line).group(1)),
-                '',
-            ]
-            state = (name, None)
+            result = self._paragraph_heading(line)
+            state = (name, 0)
         elif M['bullet'](line):
             name = 'bullet'
             indent, result = self._paragraph_bullet(line, ln, name)
@@ -176,14 +172,22 @@ class Convert:
         elif M['figure'](line):
             name = 'figure'
             result = self._paragraph_figure(line)
-            state = (name, None)
+            state = (name, 0)
         else:
             name = 'NOTHING'
             result = [self.parse_inline_and_render(line, ln, 0)]  # FIXME: 0?
-            state = (name, None)
+            state = (name, 0)
 
         self.line_states.append(state)
         logger.debug('LINE %d match as %s\n     IN: %s\n    OUT: %s', ln+1, name, line, result)
+        return result
+
+    def _paragraph_heading(self, line):
+        m = M['heading'](line)
+        result = [
+            self._h2(m.group(1)),
+            '',
+        ]
         return result
 
     def _paragraph_figure(self, line):
@@ -256,7 +260,8 @@ class Convert:
         return result
 
     def _inline_code(self, line, indent: int):
-        code_type = M['code'](line).group(1)
+        m = typing.cast(typing.Match, M['code'](line))
+        code_type = m.group(1)
         self.mode.set_code(indent, code_type)
         ext = os.path.splitext(code_type)[1]
         if ext in CODE_EXT_LANG:
