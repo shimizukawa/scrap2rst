@@ -171,26 +171,11 @@ class Convert:
             state = (name, None)
         elif M['bullet'](line):
             name = 'bullet'
-            m = M['bullet'](line)
-            # FIXME: enumerated list has no 2 indented children.
-            indent = (len(m.group(1)) - 1)
-            pre = ' ' * 2 * indent
-            body = self.parse_inline_and_render(m.group(2), ln, indent)
-            if self.line_states[ln-1] == (name, indent):
-                result = [pre + '* ' + body]
-            else:
-                # when bullets level is changed, insert blank line before new indentation
-                result = ['', pre + '* ' + body]
+            indent, result = self._paragraph_bullet(line, ln, name)
             state = (name, indent)
         elif M['figure'](line):
             name = 'figure'
-            m = M['figure'](line)
-            image_url = get_normalized_image_url(m.group(1))
-            result = [
-                '',
-                f'.. figure:: {image_url}',
-                '',
-                ]
+            result = self._paragraph_figure(line)
             state = (name, None)
         else:
             name = 'NOTHING'
@@ -201,54 +186,88 @@ class Convert:
         logger.debug('LINE %d match as %s\n     IN: %s\n    OUT: %s', ln+1, name, line, result)
         return result
 
+    def _paragraph_figure(self, line):
+        m = M['figure'](line)
+        image_url = get_normalized_image_url(m.group(1))
+        result = [
+            '',
+            f'.. figure:: {image_url}',
+            '',
+        ]
+        return result
+
+    def _paragraph_bullet(self, line, ln, name):
+        m = M['bullet'](line)
+        # FIXME: enumerated list has no 2 indented children.
+        indent = (len(m.group(1)) - 1)
+        pre = ' ' * 2 * indent
+        body = self.parse_inline_and_render(m.group(2), ln, indent)
+        if self.line_states[ln - 1] == (name, indent):
+            result = [pre + '* ' + body]
+        else:
+            # when bullets level is changed, insert blank line before new indentation
+            result = ['', pre + '* ' + body]
+        return indent, result
+
     def parse_inline_and_render(self, line: str, ln: int, indent: int) -> str:
         # FIXME: inline parser must parse whole line. currently parsing a first part.
         if M['code'](line):
             name = 'code'
-            code_type = M['code'](line).group(1)
-            self.mode.set_code(indent, code_type)
-            ext = os.path.splitext(code_type)[1]
-            if ext in CODE_EXT_LANG:
-                code_lang = CODE_EXT_LANG[ext]
-            elif code_type in CODE_TYPE_LANG:
-                code_lang = CODE_TYPE_LANG[code_type]
-            else:
-                code_lang = code_type
-                logger.warning('code type %r does not defined.', code_type)
-            # note: reST requires empty line before and after directive.
-            result = f'\n{indent * " " * 2}.. code:: {code_lang}\n'
+            result = self._inline_code(line, indent)
         elif M['image'](line):
             name = 'image'
-            # FIXME: inline image must be `|name|` and `.. |name| image:: PATH`
-            m = M['image'](line)
-            image_url = get_normalized_image_url(m.group(1))
-            result = f'.. image:: {image_url}'
+            result = self._inline_image(line)
         elif M['link'](line):
             name = 'link'
-            m = M['link'](line)
-            _pre, _target, _post = m.groups()
-            if M['link_external'](_target):
-                _link, _, _title = M['link_external'](_target).groups()
-            else:
-                _link = self.user_url + '/' + _target.replace(' ', '_')
-                _title = _target
-
-            if _pre and not _pre.endswith(' '):
-                _pre = _pre + ' '
-            if _post and not _post.startswith(' '):
-                _post = ' ' + _post
-            if _title:
-                # pre-text [https://example.com/foo title text] post-text
-                result = '{0}`{1}`_{2}'.format(_pre, _title, _post)
-                self.link_targets[_title] = _link
-            else:
-                # pre-text [https://example.com/foo] post-text
-                result = '{0}{1}{2}'.format(_pre, _link, _post)
+            result = self._inline_link(line)
         else:
             name = 'NOTHING'
             result = line
 
         logger.debug('LINE %d match as %s\n IN: %s\nOUT: %s', ln+1, name, line, result)
+        return result
+
+    def _inline_image(self, line):
+        # FIXME: inline image must be `|name|` and `.. |name| image:: PATH`
+        m = M['image'](line)
+        image_url = get_normalized_image_url(m.group(1))
+        result = f'.. image:: {image_url}'
+        return result
+
+    def _inline_link(self, line):
+        m = M['link'](line)
+        _pre, _target, _post = m.groups()
+        if M['link_external'](_target):
+            _link, _, _title = M['link_external'](_target).groups()
+        else:
+            _link = self.user_url + '/' + _target.replace(' ', '_')
+            _title = _target
+        if _pre and not _pre.endswith(' '):
+            _pre = _pre + ' '
+        if _post and not _post.startswith(' '):
+            _post = ' ' + _post
+        if _title:
+            # pre-text [https://example.com/foo title text] post-text
+            result = '{0}`{1}`_{2}'.format(_pre, _title, _post)
+            self.link_targets[_title] = _link
+        else:
+            # pre-text [https://example.com/foo] post-text
+            result = '{0}{1}{2}'.format(_pre, _link, _post)
+        return result
+
+    def _inline_code(self, line, indent: int):
+        code_type = M['code'](line).group(1)
+        self.mode.set_code(indent, code_type)
+        ext = os.path.splitext(code_type)[1]
+        if ext in CODE_EXT_LANG:
+            code_lang = CODE_EXT_LANG[ext]
+        elif code_type in CODE_TYPE_LANG:
+            code_lang = CODE_TYPE_LANG[code_type]
+        else:
+            code_lang = code_type
+            logger.warning('code type %r does not defined.', code_type)
+        # note: reST requires empty line before and after directive.
+        result = f'\n{indent * " " * 2}.. code:: {code_lang}\n'
         return result
 
     def run(self) -> str:
