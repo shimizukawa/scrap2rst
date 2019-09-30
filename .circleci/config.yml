@@ -1,9 +1,12 @@
-version: 2
-jobs:
-  build:
-    working_directory: ~/repo
+version: 2.1
+executors:
+  my-executor:
     docker:
       - image: circleci/python:3.7.3
+    working_directory: ~/repo
+
+commands:
+  setup:
     steps:
       - checkout
       - run: sudo chown -R circleci:circleci /usr/local/bin
@@ -20,7 +23,37 @@ jobs:
             - ".venv"
             - "/usr/local/bin"
             - "/usr/local/lib/python3.6/site-packages"
+
+jobs:
+  flake8:
+    executor: my-executor
+    steps:
+      - setup
       - run: poetry run tox -e flake8
+
+  mypy:
+    executor: my-executor
+    steps:
+      - setup
       - run: poetry run tox -e mypy
-      - run: poetry run tox -e py37
+
+  readme:
+    executor: my-executor
+    steps:
+      - setup
       - run: poetry run tox -e readme
+
+  unittest:
+    executor: my-executor
+    steps:
+      - setup
+      - run: poetry run tox -e py37
+
+workflows:
+  version: 2
+  check_and_test:
+    jobs:
+      - flake8
+      - mypy
+      - readme
+      - unittest
